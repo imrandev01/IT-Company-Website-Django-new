@@ -15,9 +15,10 @@ TEMPLATES_DIR=os.path.join(BASE_DIR,'templates')
 SECRET_KEY = 'django-insecure-8ggjn_g7$6y^yiowt61a8q1nyrso#f882q$gt@(il#4*l%_%pu'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Read DEBUG and ALLOWED_HOSTS from environment so we can override on the server
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -34,6 +35,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise middleware to serve static files in production
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -115,6 +118,12 @@ STATICFILES_DIRS=[
     STATIC_DIR,
 
 ]
+
+# Directory where `collectstatic` will collect static files for production
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Use WhiteNoise to serve compressed static files in production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
